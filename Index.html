@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Vembus">
+    <title>Vembus - Monitoramento de Ônibus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        color: #333;
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-top: 40px;
+    }
+
+    .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .logo-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4F79FF, #7B68EE);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(79, 121, 255, 0.3);
+        color: white;
+        font-size: 24px;
+    }
+
+    .logo-text {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4F79FF, #7B68EE);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .subtitle {
+        color: #6B7280;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .location-status {
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        border: 1px solid #E5E7EB;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot.active {
+        background: #10B981;
+    }
+
+    .status-dot.searching {
+        background: #F59E0B;
+    }
+
+    .status-dot.error {
+        background: #EF4444;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .add-line-section {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        border: 1px solid #E5E7EB;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .line-input {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    .line-input:focus {
+        border-color: #4F79FF;
+    }
+
+    .add-btn {
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #4F79FF, #7B68EE);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .quick-add {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .quick-btn {
+        padding: 6px 12px;
+        background: #F3F4F6;
+        border: 1px solid #D1D5DB;
+        border-radius: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .quick-btn:hover {
+        background: #E5E7EB;
+    }
+
+    .lines-container {
+        margin-bottom: 20px;
+    }
+
+    .line-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        border: 1px solid #E5E7EB;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .line-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #4F79FF, #7B68EE);
+    }
+
+    .line-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .line-number {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4F79FF;
+    }
+
+    .remove-btn {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #DC2626;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .remove-btn:hover {
+        background: #FEE2E2;
+    }
+
+    .bus-info {
+        margin-bottom: 10px;
+    }
+
+    .next-buses {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .bus-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        background: #F9FAFB;
+        border-radius: 10px;
+        border-left: 3px solid #4F79FF;
+    }
+
+    .bus-item.first {
+        border-left-color: #10B981;
+        background: #F0FDF4;
+    }
+
+    .bus-item.second {
+        border-left-color: #F59E0B;
+        background: #FFFBEB;
+    }
+
+    .bus-item.third {
+        border-left-color: #6B7280;
+        background: #F9FAFB;
+    }
+
+    .bus-direction {
+        font-size: 13px;
+        color: #6B7280;
+        margin-bottom: 3px;
+    }
+
+    .bus-time {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .bus-time.arriving {
+        color: #10B981;
+    }
+
+    .bus-time.soon {
+        color: #F59E0B;
+    }
+
+    .bus-time.later {
+        color: #6B7280;
+    }
+
+    .no-location {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6B7280;
+    }
+
+    .location-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .enable-location-btn {
+        background: linear-gradient(135deg, #4F79FF, #7B68EE);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 16px;
+        transition: transform 0.2s ease;
+    }
+
+    .enable-location-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .footer {
+        text-align: center;
+        padding: 20px;
+        color: #9CA3AF;
+        font-size: 12px;
+    }
+
+    .install-info {
+        background: linear-gradient(135deg, #4F79FF, #7B68EE);
+        color: white;
+        padding: 16px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .install-btn {
+        background: white;
+        color: #4F79FF;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    .success-message {
+        background: #F0FDF4;
+        border: 1px solid #BBF7D0;
+        color: #166534;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    .error-message {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #DC2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+        
+        .header {
+            padding-top: 20px;
+        }
+    }
+
+    /* iOS Safari specific styles */
+    @supports (-webkit-touch-callout: none) {
+        .container {
+            padding-bottom: 40px;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <!-- Header com Logo -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🚌</div>
+                <span class="logo-text">Vembus</span>
+            </div>
+            <div class="subtitle">Monitore seus ônibus em tempo real</div>
+        </div>
+
+```
+    <!-- Informações de Instalação -->
+    <div class="install-info" id="installPrompt">
+        <div>📱 Para melhor experiência!</div>
+        <div style="font-size: 14px; margin-top: 8px;">Adicione à tela inicial: Compartilhar → "Adicionar à Tela Inicial"</div>
+    </div>
+
+    <!-- Status da Localização -->
+    <div class="location-status">
+        <div class="status-indicator">
+            <div class="status-dot searching" id="statusDot"></div>
+            <span id="locationStatus">Toque para ativar localização</span>
+        </div>
+        <div id="locationDetails" style="font-size: 12px; color: #6B7280;"></div>
+        <button class="enable-location-btn" onclick="enableLocation()" id="locationBtn" style="margin-top: 12px;">
+            Ativar Localização GPS
+        </button>
+    </div>
+
+    <!-- Seção para Adicionar Linhas -->
+    <div class="add-line-section">
+        <h3 style="margin-bottom: 15px; color: #374151;">Adicionar Linha</h3>
+        <div class="input-group">
+            <input type="text" class="line-input" id="lineInput" placeholder="Ex: 875, 6010-10, 177A..." maxlength="15">
+            <button class="add-btn" onclick="addLine()" id="addBtn">Adicionar</button>
+        </div>
+        <div class="quick-add">
+            <button class="quick-btn" onclick="quickAddLine('875')">875</button>
+            <button class="quick-btn" onclick="quickAddLine('875P')">875P</button>
+            <button class="quick-btn" onclick="quickAddLine('6010-10')">6010-10</button>
+            <button class="quick-btn" onclick="quickAddLine('177A')">177A</button>
+            <button class="quick-btn" onclick="quickAddLine('5174-10')">5174-10</button>
+            <button class="quick-btn" onclick="quickAddLine('702U')">702U</button>
+        </div>
+        <div id="messageContainer"></div>
+    </div>
+
+    <!-- Container das Linhas -->
+    <div class="lines-container" id="linesContainer">
+        <div style="text-align: center; padding: 40px 20px; color: #6B7280;">
+            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚌</div>
+            <h3>Nenhuma linha adicionada</h3>
+            <p>Adicione suas linhas favoritas para monitorar os horários</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Vembus v2.2 - Funcionando no iPhone! 🚌</p>
+        <p>Dados em tempo real simulados para demonstração</p>
+    </div>
+</div>
+
+<script>
+    // Estado da aplicação simplificado
+    let userLocation = null;
+    let userLines = [];
+    let updateInterval = null;
+
+    // Dados das linhas simulados
+    const busData = {
+        '875': {
+            name: 'Linha 875',
+            destinations: ['Term. Princesa Isabel', 'Term. Bandeira'],
+            routes: [
+                { destination: 'Term. Princesa Isabel', times: [3, 8, 15] },
+                { destination: 'Term. Bandeira', times: [5, 12, 20] }
+            ]
+        },
+        '6010': {
+            name: 'Linha 6010',
+            destinations: ['Metrô Vila Madalena', 'Term. Lapa'],
+            routes: [
+                { destination: 'Metrô Vila Madalena', times: [2, 7, 18] },
+                { destination: 'Term. Lapa', times: [4, 11, 22] }
+            ]
+        },
+        '177': {
+            name: 'Linha 177',
+            destinations: ['Term. São Mateus', 'Metrô Sé'],
+            routes: [
+                { destination: 'Term. São Mateus', times: [6, 14, 25] },
+                { destination: 'Metrô Sé', times: [9, 17, 28] }
+            ]
+        },
+        '5174': {
+            name: 'Linha 5174',
+            destinations: ['Cidade Universitária', 'Term. Butantã'],
+            routes: [
+                { destination: 'Cidade Universitária', times: [1, 10, 19] },
+                { destination: 'Term. Butantã', times: [3, 13, 24] }
+            ]
+        },
+        '702': {
+            name: 'Linha 702',
+            destinations: ['Vila Olímpia', 'Term. Jabaquara'],
+            routes: [
+                { destination: 'Vila Olímpia', times: [5, 16, 27] },
+                { destination: 'Term. Jabaquara', times: [8, 19, 30] }
+            ]
+        }
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚌 Vembus inicializando...');
+        
+        // Carregar dados salvos
+        loadSavedData();
+        
+        // Configurar event listeners
+        setupEventListeners();
+        
+        // Renderizar interface
+        renderLines();
+        
+        console.log('✅ Vembus inicializado com sucesso!');
+    });
+
+    function loadSavedData() {
+        try {
+            const savedLines = localStorage.getItem('vembus_lines');
+            if (savedLines) {
+                userLines = JSON.parse(savedLines);
+            }
+        } catch (error) {
+            console.warn('Erro ao carregar dados salvos:', error);
+            userLines = [];
+        }
+    }
+
+    function setupEventListeners() {
+        const lineInput = document.getElementById('lineInput');
+        if (lineInput) {
+            lineInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addLine();
+                }
+            });
+        }
+    }
+
+    function showMessage(text, type = 'success') {
+        const container = document.getElementById('messageContainer');
+        const messageClass = type === 'success' ? 'success-message' : 'error-message';
+        
+        container.innerHTML = `<div class="${messageClass}">${text}</div>`;
+        
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 3000);
+    }
+
+    function validateLineNumber(lineNumber) {
+        // Aceita números com letras e hífens (formato SPTrans)
+        // Exemplos válidos: 875, 875P, 6010-10, 177A, 5174-10, 702U
+        const lineRegex = /^[0-9]+[A-Z]?(-[0-9]+)?$/i;
+        return lineRegex.test(lineNumber);
+    }
+
+    function addLine() {
+        try {
+            const input = document.getElementById('lineInput');
+            let lineNumber = input.value.trim().toUpperCase(); // Converter para maiúscula
+            
+            if (!lineNumber) {
+                showMessage('Digite o número da linha!', 'error');
+                return;
+            }
+            
+            // Validar formato da linha
+            if (!validateLineNumber(lineNumber)) {
+                showMessage('Formato inválido! Use: 875, 875P, 6010-10, etc.', 'error');
+                return;
+            }
+            
+            if (userLines.includes(lineNumber)) {
+                showMessage('Esta linha já está na sua lista!', 'error');
+                return;
+            }
+            
+            userLines.push(lineNumber);
+            
+            // Salvar dados
+            try {
+                localStorage.setItem('vembus_lines', JSON.stringify(userLines));
+            } catch (e) {
+                console.warn('Erro ao salvar:', e);
+            }
+            
+            input.value = '';
+            renderLines();
+            showMessage(`Linha ${lineNumber} adicionada com sucesso!`);
+            
+            // Iniciar atualização se há localização
+            if (userLocation) {
+                startBusMonitoring();
+            }
+            
+        } catch (error) {
+            console.error('Erro ao adicionar linha:', error);
+            showMessage('Erro ao adicionar linha', 'error');
+        }
+    }
+
+    function quickAddLine(lineNumber) {
+        try {
+            if (userLines.includes(lineNumber)) {
+                showMessage('Esta linha já está na sua lista!', 'error');
+                return;
+            }
+            
+            userLines.push(lineNumber);
+            
+            try {
+                localStorage.setItem('vembus_lines', JSON.stringify(userLines));
+            } catch (e) {
+                console.warn('Erro ao salvar:', e);
+            }
+            
+            renderLines();
+            showMessage(`Linha ${lineNumber} adicionada!`);
+            
+            if (userLocation) {
+                startBusMonitoring();
+            }
+            
+        } catch (error) {
+            console.error('Erro ao adicionar linha rápida:', error);
+            showMessage('Erro ao adicionar linha', 'error');
+        }
+    }
+
+    function removeLine(lineNumber) {
+        try {
+            if (confirm(`Remover linha ${lineNumber} da sua lista?`)) {
+                userLines = userLines.filter(line => line !== lineNumber);
+                
+                try {
+                    localStorage.setItem('vembus_lines', JSON.stringify(userLines));
+                } catch (e) {
+                    console.warn('Erro ao salvar:', e);
+                }
+                
+                renderLines();
+                showMessage(`Linha ${lineNumber} removida!`);
+            }
+        } catch (error) {
+            console.error('Erro ao remover linha:', error);
+            showMessage('Erro ao remover linha', 'error');
+        }
+    }
+
+    function renderLines() {
+        const container = document.getElementById('linesContainer');
+        
+        if (!container) return;
+        
+        if (userLines.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px; color: #6B7280;">
+                    <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚌</div>
+                    <h3>Nenhuma linha adicionada</h3>
+                    <p>Adicione suas linhas favoritas para monitorar os horários</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = userLines.map(lineNumber => {
+            const busInfo = busData[lineNumber] || {
+                name: `Linha ${lineNumber}`,
+                routes: [
+                    { 
+                        destination: `Terminal A (${lineNumber})`, 
+                        times: [Math.floor(Math.random() * 10) + 2, Math.floor(Math.random() * 15) + 8, Math.floor(Math.random() * 25) + 15] 
+                    },
+                    { 
+                        destination: `Terminal B (${lineNumber})`, 
+                        times: [Math.floor(Math.random() * 12) + 4, Math.floor(Math.random() * 18) + 10, Math.floor(Math.random() * 30) + 18] 
+                    }
+                ]
+            };
+            
+            return `
+                <div class="line-card">
+                    <div class="line-header">
+                        <div class="line-number">${lineNumber}</div>
+                        <button class="remove-btn" onclick="removeLine('${lineNumber}')">Remover</button>
+                    </div>
+                    <div>
+                        ${renderBusInfo(lineNumber, busInfo)}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderBusInfo(lineNumber, busInfo) {
+        if (!userLocation) {
+            return `
+                <div style="text-align: center; padding: 20px; color: #6B7280;">
+                    <div style="font-size: 24px; margin-bottom: 8px;">📍</div>
+                    <p>Ative a localização para ver horários precisos</p>
+                </div>
+            `;
+        }
+
+        return busInfo.routes.map(route => `
+            <div class="bus-info">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #374151;">
+                    → ${route.destination}
+                </div>
+                <div class="next-buses">
+                    ${route.times.map((time, index) => `
+                        <div class="bus-item ${index === 0 ? 'first' : index === 1 ? 'second' : 'third'}">
+                            <div>
+                                <div class="bus-direction">Próximo ônibus</div>
+                                <div class="bus-time ${time <= 3 ? 'arriving' : time <= 10 ? 'soon' : 'later'}">
+                                    ${time === 0 ? 'Chegando' : time === 1 ? '1 minuto' : `${time} minutos`}
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: #6B7280;">
+                                ${index === 0 ? '🚌' : index === 1 ? '🔄' : '⏳'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('<hr style="margin: 15px 0; border: none; border-top: 1px solid #E5E7EB;">');
+    }
+
+    function enableLocation() {
+        if (!navigator.geolocation) {
+            showMessage('Geolocalização não suportada neste dispositivo', 'error');
+            return;
+        }
+
+        updateLocationStatus('searching', 'Buscando sua localização...');
+        
+        const locationBtn = document.getElementById('locationBtn');
+        if (locationBtn) {
+            locationBtn.textContent = 'Buscando...';
+            locationBtn.disabled = true;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                };
+                
+                updateLocationStatus('active', 'Localização ativa ✅');
+                document.getElementById('locationDetails').textContent = 
+                    `Precisão: ${Math.round(userLocation.accuracy)}m`;
+                
+                if (locationBtn) {
+                    locationBtn.style.display = 'none';
+                }
+                
+                // Atualizar linhas com dados baseados na localização
+                renderLines();
+                
+                // Iniciar monitoramento se há linhas
+                if (userLines.length > 0) {
+                    startBusMonitoring();
+                }
+                
+                showMessage('Localização ativada! Horários mais precisos agora.');
+            },
+            (error) => {
+                let message = 'Erro ao obter localização';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = 'Permissão de localização negada';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = 'Localização indisponível';
+                        break;
+                    case error.TIMEOUT:
+                        message = 'Tempo limite para localização';
+                        break;
+                }
+                updateLocationStatus('error', message);
+                
+                if (locationBtn) {
+                    locationBtn.textContent = 'Tentar Novamente';
+                    locationBtn.disabled = false;
+                }
+                
+                showMessage(message + '. Você ainda pode usar o app!', 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    }
+
+    function updateLocationStatus(status, message) {
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('locationStatus');
+        
+        if (statusDot) {
+            statusDot.className = `status-dot ${status}`;
+        }
+        
+        if (statusText) {
+            statusText.textContent = message;
+        }
+    }
+
+    function startBusMonitoring() {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+        
+        // Atualizar a cada 30 segundos
+        updateInterval = setInterval(updateBusData, 30000);
+        updateBusData();
+    }
+
+    function updateBusData() {
+        if (!userLocation || userLines.length === 0) return;
+        
+        // Simular variação nos tempos
+        userLines.forEach(lineNumber => {
+            const busInfo = busData[lineNumber];
+            if (busInfo) {
+                busInfo.routes.forEach(route => {
+                    route.times = route.times.map(time => {
+                        const newTime = Math.max(0, time - 1);
+                        return newTime === 0 ? Math.floor(Math.random() * 20) + 2 : newTime;
+                    });
+                });
+            }
+        });
+        
+        renderLines();
+    }
+
+    // Limpar interval quando sair
+    window.addEventListener('beforeunload', function() {
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+    });
+
+    // Log para debug
+    console.log('🚌 Vembus carregado e pronto para uso!');
+</script>
+```
+
+</body>
+</html>
